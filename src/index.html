@@ -1,1 +1,99 @@
-<div id='root'></div>
+<html>
+<head>
+  <title>Login Page</title>
+  <!-- Import Carbon Design System V11 CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/carbon-components/css/carbon-components.min.css">
+  <!-- Import Carbon Design System V11 JavaScript -->
+  <script src="https://unpkg.com/carbon-components/umd/carbon-components.min.js"></script>
+</head>
+<body>
+  <div class="bx--grid">
+    <div class="bx--row">
+      <div class="bx--col-lg-8 bx--offset-lg-4">
+        <h1>Log in</h1>
+        <!-- Create a form element to collect user input -->
+        <form id="login-form" onsubmit="return login()">
+          <div class="bx--form-item">
+            <label for="username" class="bx--label">Username</label>
+            <!-- Use Carbon Design System V11 text input component -->
+            <div class="bx--text-input__field-wrapper">
+              <input id="username" type="text" class="bx--text-input" placeholder="Enter your username" required>
+            </div>
+          </div>
+          <div class="bx--form-item">
+            <label for="password" class="bx--label">Password</label>
+            <!-- Use Carbon Design System V11 password input component -->
+            <div class="bx--text-input__field-wrapper">
+              <input id="password" type="password" class="bx--text-input" placeholder="Enter your password" required>
+            </div>
+          </div>
+          <div class="bx--form-item">
+            <!-- Use Carbon Design System V11 checkbox component -->
+            <div class="bx--checkbox-wrapper">
+              <input id="remember-id" type="checkbox" class="bx--checkbox" value="remember-id">
+              <label for="remember-id" class="bx--checkbox-label">Remember ID</label>
+            </div>
+          </div>
+          <div class="bx--form-item">
+            <!-- Use Carbon Design System V11 button component -->
+            <button type="submit" class="bx--btn bx--btn--primary">Log in</button>
+          </div>
+        </form>
+        <!-- Create links to create account and reset password -->
+        <p><a href="#">Create account</a> | <a href="#">Forgot username or password?</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Write some JavaScript code to handle authentication logic -->
+  <script>
+    // Define a function to log in the user
+    function login() {
+      // Get the user input from the form element
+      var username = document.getElementById("username").value;
+      var password = document.getElementById("password").value;
+      var remember = document.getElementById("remember-id").checked;
+
+      // Create an XMLHttpRequest object to communicate with the IBM Cloud IAM API
+      var xhttp = new XMLHttpRequest();
+      // Set the request method, URL, and asynchronous flag
+      xhttp.open("POST", "https://iam.cloud.ibm.com/identity/token", true);
+      // Set the request header for the content type
+      xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      // Set the request header for the authorization
+      xhttp.setRequestHeader("Authorization", "Basic Yng6Yng=");
+      // Send the request data as a URL encoded string
+      xhttp.send("grant_type=password&username="+username+"&password="+password);
+      // Define a callback function for the ready state change event
+      xhttp.onreadystatechange = function() {
+        // Check if the request is completed
+        if (this.readyState == 4) {
+          // Parse the response data as a JSON object
+          var response = JSON.parse(this.responseText);
+          // Check if the status is ok
+          if (response["access_token"]) {
+            // Get the access token from the response
+            var token = response["access_token"];
+            // Check if the user wants to remember their ID
+            if (remember) {
+              // Store the username and the token in the local storage
+              localStorage.setItem("username", username);
+              localStorage.setItem("token", token);
+            } else {
+              // Store the token in the session storage
+              sessionStorage.setItem("token", token);
+            }
+            // Redirect the user to the home page
+            window.location.href = "home.html";
+          } else {
+            // Display an alert message with the error
+            alert(response["error_description"]);
+          }
+        }
+      };
+      // Prevent the default action of the form submission
+      return false;
+    }
+  </script>
+</body>
+</html>
